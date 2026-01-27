@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Volume2, VolumeX, ArrowRight, Gamepad2, Home } from 'lucide-react';
+import { Volume2, VolumeX, ArrowRight, Gamepad2, MousePointer, Rat, Hand, Zap } from 'lucide-react';
 
 /* =========================================================================
-   DADOS DA AULA (15 FASES: Vídeo -> Slides -> Jogo)
+   DADOS DA AULA (ORDEM: Vídeo -> Slides 1-14 -> Jogo -> Slide 15 + Fogos)
    ========================================================================= */
 const SLIDES_DATA = [
   { type: 'video', src: '/abertura-aula.mp4' },
@@ -12,32 +12,148 @@ const SLIDES_DATA = [
   { type: 'slide', id: 3,  audio: '/slide-03.wav', gif: '/gif01.gif', title: 'Mapa de Fases', text: 'Dá uma olhada no nosso mapa! Cada fase traz um superpoder diferente. Vamos no seu ritmo, do zero ao profissional.' },
   { type: 'slide', id: 4,  audio: '/slide-04.wav', gif: '/gif02.gif', title: 'O Objetivo Final', text: 'Ao final dessa saga, você vai dominar o Mouse, o Teclado e entender o que tem dentro da máquina!' },
   { type: 'slide', id: 5,  audio: '/slide-05.wav', gif: '/gif01.gif', title: 'A Primeira Missão', text: 'Nesta primeira missão, vamos descobrir como a informação viaja até nós. Foca na tela que a nossa jornada começa agora!' },
-  { type: 'slide', id: 6,  audio: '/slide-06.wav', gif: '/gif02.gif', title: 'O Mouse', text: 'Primeira parada: O Mouse! Você sabia que "Mouse" significa "Rato" em inglês? O formato dele lembrava um ratinho.' },
-  { type: 'slide', id: 7,  audio: '/slide-07.wav', gif: '/gif01.gif', title: 'Não Morde!', text: 'Relaxa, esse rato não morde! Ele é o nosso periférico de entrada principal. Ele funciona como sua mão dentro da tela.' },
-  { type: 'slide', id: 8,  audio: '/slide-08.wav', gif: '/gif02.gif', title: 'O Cursor', text: 'Quando você mexe o mouse aqui fora, ele controla aquele Cursor (a setinha) lá dentro. É pura mágica tecnológica!' },
+  
+  // --- BLOCO COM EFEITOS VISUAIS ---
+  { type: 'slide', id: 6,  audio: '/slide-06.wav', gif: '/gif02.gif', title: 'O Mouse', text: 'Primeira parada: O Mouse! Você sabia que "Mouse" significa "Rato" em inglês? O formato dele lembrava um ratinho.', effect: 'mouse-rat' },
+  { type: 'slide', id: 7,  audio: '/slide-07.wav', gif: '/gif01.gif', title: 'Não Morde!', text: 'Relaxa, esse rato não morde! Ele é o nosso periférico de entrada principal. Ele funciona como sua mão dentro da tela.', effect: 'hand' },
+  { type: 'slide', id: 8,  audio: '/slide-08.wav', gif: '/gif02.gif', title: 'O Cursor', text: 'Quando você mexe o mouse aqui fora, ele controla aquele Cursor (a setinha) lá dentro. É pura mágica tecnológica!', effect: 'cursor' },
+  // ----------------------------------
+
   { type: 'slide', id: 9,  audio: '/slide-09.wav', gif: '/gif01.gif', title: 'O Clique', text: 'E tem o clique! É como apertar o gatilho num jogo. Faz "click" e confirma a sua ação no computador.' },
   { type: 'slide', id: 10, audio: '/slide-10.wav', gif: '/gif02.gif', title: 'Ergonomia Pro', text: 'Agora, um segredo de Pro Player: o conforto. Ninguém quer ter "Game Over" na mão por causa de dor, né?' },
   { type: 'slide', id: 11, audio: '/slide-11.wav', gif: '/gif01.gif', title: 'Modo Sem Dor', text: 'Usar o mouse do jeito errado pode cansar. Vamos ativar o Modo Ergonômico para jogar por horas sem problemas.' },
   { type: 'slide', id: 12, audio: '/slide-12.wav', gif: '/gif02.gif', title: 'Mão Relaxada', text: 'Regra de ouro: Mão relaxada! Deixe sua mão descansar sobre o mouse, como se fosse um travesseiro macio.' },
   { type: 'slide', id: 13, audio: '/slide-13.wav', gif: '/gif01.gif', title: 'Cuidado com o Punho', text: 'Atenção ao punho! Nada de deixar o pulso dobrado na quina da mesa. O braço precisa ter apoio total.' },
   { type: 'slide', id: 14, audio: '/slide-14.wav', gif: '/gif02.gif', title: 'Desafio de Precisão', text: 'Chega de papo, hora da ação! Vamos ver se você pegou o jeito. Sua missão é levar o cursor do ponto A ao ponto B.' },
-  { type: 'slide', id: 15, audio: '/slide-15.wav', gif: '/gif01.gif', title: 'Valendo!', text: 'Tente fazer uma linha reta e suave. Cuidado com os obstáculos! Clique no botão abaixo para começar o Jogo.' },
-  { type: 'game' } // Fase final
+  
+  { type: 'game' }, // Fase do Jogo
+  
+  // --- FASE FINAL DE CELEBRAÇÃO ---
+  { type: 'slide', id: 15, audio: '/slide-15.wav', gif: '/gif01.gif', title: 'MISSÃO CUMPRIDA!', text: 'Mandou muito bem! Você dominou o básico do mouse com precisão de mestre. Nos vemos na próxima Missão!', effect: 'fireworks' }
 ];
 
 /* =========================================================================
-   COMPONENTE: JOGO NINJA
+   COMPONENTE: EFEITO DE DIGITAÇÃO (Typewriter)
+   ========================================================================= */
+const TypingText = ({ text, speed = 30 }) => {
+    const [displayedText, setDisplayedText] = useState("");
+    
+    useEffect(() => {
+      setDisplayedText(""); 
+      let i = 0;
+      const interval = setInterval(() => {
+        if (i < text.length) {
+          setDisplayedText((prev) => prev + text.charAt(i));
+          i++;
+        } else {
+          clearInterval(interval);
+        }
+      }, speed);
+      return () => clearInterval(interval);
+    }, [text, speed]);
+  
+    return <span>{displayedText}</span>;
+};
+
+/* =========================================================================
+   COMPONENTE: EFEITOS VISUAIS CRIATIVOS (Overlay)
+   ========================================================================= */
+const CreativeOverlay = ({ type }) => {
+    if (!type) return null;
+
+    return (
+        <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden flex items-center justify-center opacity-30">
+            {type === 'mouse-rat' && (
+                <div className="relative animate-pulse">
+                    <MousePointer size={300} className="text-cyan-500 absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 animate-bounce" />
+                    <Rat size={300} className="text-pink-500 absolute top-0 left-20 -translate-x-1/2 -translate-y-1/2 animate-bounce delay-700" />
+                </div>
+            )}
+            {type === 'hand' && (
+                <div className="animate-pulse-slow">
+                     <Hand size={400} className="text-yellow-400 drop-shadow-[0_0_50px_rgba(250,204,21,0.5)] rotate-12" />
+                </div>
+            )}
+            {type === 'cursor' && (
+                <div className="animate-spin-slow">
+                    <Zap size={400} className="text-blue-500 blur-sm" />
+                </div>
+            )}
+            {type === 'fireworks' && <FireworksCanvas />}
+        </div>
+    );
+};
+
+/* =========================================================================
+   COMPONENTE: FOGOS DE ARTIFÍCIO (Canvas)
+   ========================================================================= */
+const FireworksCanvas = () => {
+    const canvasRef = useRef(null);
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+        let width = window.innerWidth;
+        let height = window.innerHeight;
+        canvas.width = width; canvas.height = height;
+        
+        let particles = [];
+        const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#00ffff', '#ff00ff'];
+
+        const createFirework = () => {
+            const x = Math.random() * width;
+            const y = Math.random() * (height / 2);
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            for(let i=0; i<50; i++) {
+                particles.push({
+                    x, y, color,
+                    vx: (Math.random() - 0.5) * 10,
+                    vy: (Math.random() - 0.5) * 10,
+                    life: 1, decay: 0.01 + Math.random() * 0.02
+                });
+            }
+        };
+
+        const interval = setInterval(createFirework, 800);
+
+        const animate = () => {
+            ctx.clearRect(0, 0, width, height);
+            // Traço leve para efeito de rastro
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.2)';
+            ctx.fillRect(0, 0, width, height);
+
+            for(let i=particles.length-1; i>=0; i--) {
+                let p = particles[i];
+                p.x += p.vx; p.y += p.vy; p.life -= p.decay;
+                p.vy += 0.1; // gravidade
+                
+                ctx.globalAlpha = p.life;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 3, 0, Math.PI*2);
+                ctx.fill();
+
+                if(p.life <= 0) particles.splice(i, 1);
+            }
+            requestAnimationFrame(animate);
+        };
+        animate();
+
+        return () => clearInterval(interval);
+    }, []);
+
+    return <canvas ref={canvasRef} className="absolute inset-0 z-0 pointer-events-none" />;
+};
+
+/* =========================================================================
+   COMPONENTE: JOGO NINJA (Modificado para chamar o próximo slide ao vencer)
    ========================================================================= */
 const NinjaGame = ({ onComplete }) => {
   const canvasRef = useRef(null);
-  const navigate = useNavigate();
   const [gameState, setGameState] = useState('start'); 
   const [level, setLevel] = useState(1);
-  const [diamonds, setDiamonds] = useState(0);
   const [msg, setMsg] = useState("Toque no círculo azul para coletar energia!");
   const [msgColor, setMsgColor] = useState("white");
 
-  // Refs de lógica
   const glRef = useRef({
     width: 0, height: 0, particles: [], obstacles: [], mouse: { x: 0, y: 0 },
     hasEnergy: false, active: false,
@@ -58,10 +174,8 @@ const NinjaGame = ({ onComplete }) => {
     const gl = glRef.current;
 
     const resize = () => {
-      gl.width = window.innerWidth;
-      gl.height = window.innerHeight;
-      canvas.width = gl.width;
-      canvas.height = gl.height;
+      gl.width = window.innerWidth; gl.height = window.innerHeight;
+      canvas.width = gl.width; canvas.height = gl.height;
       gl.pointA.x = gl.width * 0.15; gl.pointA.y = gl.height / 2;
       gl.pointB.x = gl.width * 0.85; gl.pointB.y = gl.height / 2;
       if (gl.active) initObstacles();
@@ -70,7 +184,6 @@ const NinjaGame = ({ onComplete }) => {
     window.addEventListener('resize', resize);
     resize();
 
-    // Classes Lógicas
     class Particle {
       constructor(x, y, color, scale = 1) {
         this.x = x; this.y = y; this.color = color;
@@ -140,8 +253,7 @@ const NinjaGame = ({ onComplete }) => {
 
         const distA = Math.hypot(gl.mouse.x - gl.pointA.x, gl.mouse.y - gl.pointA.y);
         if (distA < gl.pointA.radius && !gl.hasEnergy) {
-            gl.hasEnergy = true; setMsg("Energia Carregada! ✨ Cuidado com o vermelho!"); setMsgColor("#fcd34d");
-            createExplosion(gl.pointA.x, gl.pointA.y, gl.pointA.color);
+            gl.hasEnergy = true; setMsg("Energia Carregada! ✨"); setMsgColor("#fcd34d");
         }
         const distB = Math.hypot(gl.mouse.x - gl.pointB.x, gl.mouse.y - gl.pointB.y);
         if (distB < gl.pointB.radius && gl.hasEnergy) winLevelInternal();
@@ -149,8 +261,7 @@ const NinjaGame = ({ onComplete }) => {
         if (gl.hasEnergy) {
             gl.obstacles.forEach(obs => {
                 if (gl.mouse.x > obs.x && gl.mouse.x < obs.x + obs.w && gl.mouse.y > obs.y && gl.mouse.y < obs.y + obs.h) {
-                    gl.hasEnergy = false; setMsg("Ops! Encostou! Volte ao início."); setMsgColor("#ef4444");
-                    createExplosion(gl.mouse.x, gl.mouse.y, "#ef4444");
+                    gl.hasEnergy = false; setMsg("Encostou! Volte ao início."); setMsgColor("#ef4444");
                 }
             });
         }
@@ -171,15 +282,16 @@ const NinjaGame = ({ onComplete }) => {
 
   const startGame = () => { glRef.current.active = true; glRef.current.hasEnergy = false; setGameState('playing'); setMsg("Toque no círculo azul!"); setMsgColor("white"); };
   const nextLevel = () => {
-      if (level >= 3) { alert("Parabéns Mestre Ninja!"); navigate('/'); } 
+      if (level >= 3) { 
+        onComplete(); // CHAMA O FINAL DA AULA
+      } 
       else { setLevel(prev => prev + 1); setGameState('playing'); glRef.current.active = true; glRef.current.hasEnergy = false; }
   };
 
   return (
     <div className="w-full h-full relative font-sans overflow-hidden">
         <canvas ref={canvasRef} className="block cursor-crosshair touch-none" />
-        <div className="absolute top-16 w-full p-4 flex justify-between items-center z-10">
-            <button onClick={() => navigate('/')} className="bg-slate-700 text-white px-4 py-1 rounded-full border border-cyan-500">🏠 Sair</button>
+        <div className="absolute top-16 w-full p-4 flex justify-between items-center z-10 pointer-events-none">
             <div className="text-purple-400 font-bold bg-purple-900/30 px-4 py-1 rounded-full border border-purple-500">{levels[level].name}</div>
         </div>
         <div className="absolute bottom-8 left-0 w-full text-center pointer-events-none">
@@ -189,6 +301,7 @@ const NinjaGame = ({ onComplete }) => {
             <div className="absolute inset-0 flex items-center justify-center bg-slate-900/90 backdrop-blur-sm z-50">
                 <div className="bg-slate-800 p-8 rounded-3xl border-4 border-cyan-500 max-w-md text-center">
                     <h2 className="text-4xl font-black text-cyan-400 mb-4">DESAFIO NINJA</h2>
+                    <p className="text-white mb-6">Leve a energia do ponto A ao B sem tocar no vermelho!</p>
                     <button onClick={startGame} className="w-full py-4 bg-cyan-500 text-slate-900 font-black rounded-xl text-xl hover:scale-105 transition">COMEÇAR</button>
                 </div>
             </div>
@@ -196,8 +309,10 @@ const NinjaGame = ({ onComplete }) => {
         {gameState === 'win' && (
             <div className="absolute inset-0 flex items-center justify-center bg-slate-900/90 backdrop-blur-sm z-50">
                 <div className="bg-slate-800 p-8 rounded-3xl border-4 border-green-500 max-w-md text-center">
-                    <h2 className="text-4xl font-black text-green-400 mb-2">{level === 3 ? "MESTRE!" : "VITÓRIA!"}</h2>
-                    <button onClick={nextLevel} className="w-full py-4 bg-green-500 text-slate-900 font-black rounded-xl text-xl hover:scale-105 transition">PRÓXIMA FASE</button>
+                    <h2 className="text-4xl font-black text-green-400 mb-2">VITÓRIA!</h2>
+                    <button onClick={nextLevel} className="w-full py-4 bg-green-500 text-slate-900 font-black rounded-xl text-xl hover:scale-105 transition">
+                        {level === 3 ? "FINALIZAR AULA" : "PRÓXIMA FASE"}
+                    </button>
                 </div>
             </div>
         )}
@@ -212,11 +327,11 @@ export default function Aula01() {
   const [currentStage, setCurrentStage] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef(null);
+  const navigate = useNavigate();
 
   const currentData = SLIDES_DATA[currentStage];
   const progressPercent = ((currentStage + 1) / SLIDES_DATA.length) * 100;
 
-  // Gerenciamento de Áudio
   useEffect(() => {
     if (currentData.type === 'slide' && audioRef.current) {
         audioRef.current.src = currentData.audio;
@@ -244,36 +359,37 @@ export default function Aula01() {
       {/* Áudio Invisível */}
       <audio ref={audioRef} onEnded={() => setIsPlaying(false)} />
 
-      {/* BARRA NEON DE PROGRESSO (Sem Texto) */}
-      <div className="absolute top-0 left-0 w-full h-2 bg-slate-800 z-50">
+      {/* BARRA NEON DE PROGRESSO (FIXED TOP Z-50) */}
+      <div className="absolute top-0 left-0 w-full h-2 bg-slate-800 z-[100]">
         <div 
-            className="h-full bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 shadow-[0_0_15px_#22d3ee] transition-all duration-500 ease-out"
+            className="h-full bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 shadow-[0_0_20px_#22d3ee] transition-all duration-500 ease-out"
             style={{ width: `${progressPercent}%` }}
         ></div>
       </div>
 
       {/* RENDERIZAÇÃO DO CONTEÚDO */}
-      <div className="flex-1 relative flex flex-col">
+      <div className="flex-1 relative flex flex-col w-full h-full">
         
-        {/* CASO 1: VÍDEO (Intro) */}
+        {/* CASO 1: VÍDEO (Intro) - Z-INDEX MAXIMO */}
         {currentData.type === 'video' && (
-            <div className="fixed inset-0 bg-black z-40 flex items-center justify-center">
+            <div className="absolute inset-0 bg-black z-[90] flex items-center justify-center">
                 <video 
                     src={currentData.src} 
                     className="w-full h-full object-cover"
                     autoPlay playsInline
                     onEnded={nextStage}
-                    onClick={nextStage}
                 />
-                <button onClick={nextStage} className="absolute bottom-10 right-10 text-white/30 hover:text-white border border-white/20 px-4 py-2 rounded">PULAR</button>
+                <button onClick={nextStage} className="absolute bottom-10 right-10 text-white/30 hover:text-white border border-white/20 px-4 py-2 rounded z-[100]">PULAR INTRO</button>
             </div>
         )}
 
         {/* CASO 2: SLIDES (Jack Narrador) */}
         {currentData.type === 'slide' && (
             <div className="h-full w-full flex flex-col relative">
-                {/* Fundo */}
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-900/20 via-slate-900 to-black pointer-events-none"></div>
+                {/* Fundo com efeito visual criativo */}
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-900/20 via-slate-900 to-black z-0">
+                    <CreativeOverlay type={currentData.effect} />
+                </div>
 
                 {/* HUD Superior (Botão de Som) */}
                 <div className="absolute top-6 right-6 z-40">
@@ -283,7 +399,7 @@ export default function Aula01() {
                 </div>
 
                 {/* Conteúdo Central */}
-                <div className="flex-1 flex flex-col items-center justify-center p-8 z-10 text-center max-w-4xl mx-auto mt-[-100px]">
+                <div className="flex-1 flex flex-col items-center justify-center p-8 z-10 text-center max-w-4xl mx-auto mt-[-80px]">
                     <h1 className="text-4xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600 mb-6 drop-shadow-lg">
                         {currentData.title}
                     </h1>
@@ -291,37 +407,51 @@ export default function Aula01() {
 
                 {/* JACK E BALÃO DE FALA (Fixed Bottom) */}
                 <div className="absolute bottom-0 w-full flex flex-col items-center justify-end pb-6 px-4 z-40">
-                    <div className="w-full max-w-4xl flex items-end gap-4">
+                    <div className="w-full max-w-4xl flex items-end gap-6">
                         
-                        {/* Avatar do Jack (CORRIGIDO: Agora usa o GIF corretamente) */}
-                        <div className="w-28 h-28 sm:w-40 sm:h-40 relative flex-shrink-0">
-                            {/* Círculo com efeito de brilho */}
-                            <div className="w-full h-full rounded-full border-4 border-cyan-400 bg-slate-800 shadow-[0_0_30px_rgba(34,211,238,0.4)] overflow-hidden relative z-10">
-                                {/* O GIF é carregado aqui dentro */}
-                                <img 
-                                    src={currentData.gif} 
-                                    alt="Jack" 
-                                    className="w-full h-full object-cover transform scale-125 translate-y-2"
-                                />
-                            </div>
-                            {/* Etiqueta Jack */}
-                            <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-cyan-600 text-white text-xs font-bold px-4 py-1 rounded-full uppercase tracking-widest shadow-lg z-20 border border-cyan-400">
+                        {/* Avatar do Jack (CORRIGIDO: Técnica de sobreposição para 'sair' do círculo) */}
+                        <div className="w-32 h-32 sm:w-48 sm:h-48 relative flex-shrink-0">
+                             {/* Parte de trás do círculo (fundo) */}
+                             <div className="absolute bottom-0 w-full h-full rounded-full bg-slate-800 border-4 border-cyan-500 shadow-[0_0_50px_rgba(34,211,238,0.5)] overflow-hidden">
+                                 <div className="w-full h-full bg-gradient-to-t from-black to-transparent opacity-50"></div>
+                             </div>
+                             
+                             {/* O GIF do Jack (Z-Index maior para sair do circulo) */}
+                             <img 
+                                src={currentData.gif} 
+                                alt="Jack" 
+                                className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[120%] max-w-none z-10"
+                             />
+                             
+                             {/* Plaquinha do Nome */}
+                             <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-cyan-600 text-white text-xs font-bold px-4 py-1 rounded-full uppercase tracking-widest shadow-lg z-20 border border-cyan-400">
                                 Jack
-                            </div>
+                             </div>
                         </div>
 
                         {/* Balão de Fala */}
-                        <div className="flex-1 bg-slate-800/95 backdrop-blur-xl border-2 border-cyan-500/50 p-4 sm:p-6 rounded-2xl rounded-bl-none shadow-2xl mb-4 relative min-h-[140px] flex flex-col">
-                            <p className="text-base sm:text-lg text-white font-medium leading-relaxed drop-shadow-md flex-1">
-                                {currentData.text}
+                        <div className="flex-1 bg-slate-800/95 backdrop-blur-xl border-2 border-cyan-500/50 p-6 rounded-3xl rounded-bl-none shadow-2xl mb-8 relative min-h-[160px] flex flex-col justify-between">
+                            <p className="text-lg sm:text-xl text-white font-medium leading-relaxed drop-shadow-md">
+                                <TypingText text={currentData.text} />
+                                <span className="animate-pulse text-cyan-400 ml-1">|</span>
                             </p>
-                            <div className="flex justify-end mt-2">
-                                <button 
-                                    onClick={nextStage}
-                                    className="flex items-center gap-2 bg-cyan-900/50 hover:bg-cyan-800 text-cyan-200 border border-cyan-700 px-4 py-2 rounded-full font-bold text-sm transition-all hover:scale-105"
-                                >
-                                    CONTINUAR <ArrowRight size={16} />
-                                </button>
+                            
+                            <div className="flex justify-end mt-4">
+                                {currentData.id === 15 ? (
+                                     <button 
+                                        onClick={() => navigate('/')}
+                                        className="flex items-center gap-2 bg-green-600 hover:bg-green-500 text-white border border-green-400 px-6 py-3 rounded-full font-bold text-lg shadow-[0_0_20px_rgba(34,197,94,0.6)] animate-pulse"
+                                    >
+                                        CONCLUIR MISSÃO <ArrowRight size={20} />
+                                    </button>
+                                ) : (
+                                    <button 
+                                        onClick={nextStage}
+                                        className="flex items-center gap-2 bg-cyan-900/50 hover:bg-cyan-800 text-cyan-200 border border-cyan-700 px-5 py-2 rounded-full font-bold text-sm transition-all hover:scale-105"
+                                    >
+                                        CONTINUAR <ArrowRight size={16} />
+                                    </button>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -331,7 +461,7 @@ export default function Aula01() {
 
         {/* CASO 3: JOGO */}
         {currentData.type === 'game' && (
-            <NinjaGame onComplete={() => alert('Curso Finalizado!')} />
+            <NinjaGame onComplete={nextStage} />
         )}
       </div>
     </div>
