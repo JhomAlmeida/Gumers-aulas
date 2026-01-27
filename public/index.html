@@ -5,9 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#0f172a" />
     <title>Universo Tech - Gumers</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            },
+            animation: {
+              'spin-slow': 'spin 10s linear infinite',
+              'ping-slow': 'ping 3s cubic-bezier(0, 0, 0.2, 1) infinite',
+              'shine': 'shine 1.5s linear infinite',
+            },
+            keyframes: {
+              shine: {
+                '0%': { left: '-100%' },
+                '100%': { left: '125%' },
+              }
+            }
+          }
+        }
+      }
+    </script>
   </head>
   <body>
-    <noscript>Você precisa habilitar o JavaScript para rodar este app.</noscript>
+    <noscript>Habilite o JavaScript para jogar.</noscript>
     <div id="root"></div>
   </body>
 </html>
