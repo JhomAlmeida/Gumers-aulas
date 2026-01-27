@@ -1,11 +1,68 @@
-@import url('https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css');
+/* --- Adicione isso ao final do seu src/index.css --- */
 
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background-color: #0f172a; /* Slate 900 */
+/* Animação para o efeito de digitação (o cursor piscando) */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.animate-pulse {
+  animation: pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Animação lenta para elementos de fundo */
+@keyframes spin-slow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+.animate-spin-slow {
+    animation: spin-slow 10s linear infinite;
+}
+
+/* Animação de "ping" mais suave para as partículas do mouse */
+@keyframes ping-slow {
+    75%, 100% {
+        transform: scale(2);
+        opacity: 0;
+    }
+}
+.animate-ping-slow {
+    animation: ping-slow 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+/* Efeito de brilho passando pelo botão "INICIAR MISSÃO" */
+@keyframes shine {
+    0% { left: -100%; }
+    100% { left: 125%; }
+}
+.animate-shine {
+    animation: shine 1.5s linear infinite;
+}
+
+/* Utilitários para efeito 3D nos cards */
+.perspective-1000 {
+    perspective: 1000px;
+}
+.transform-style-3d {
+    transform-style: preserve-3d;
+}
+/* Permite rodar um pouco o card no eixo Y ao passar o mouse */
+.hover\:rotate-y-6:hover {
+    transform: rotateY(6deg);
+}
+
+/* Personalização da barra de rolagem para ficar neon */
+.scrollbar-thin::-webkit-scrollbar {
+    height: 8px;
+}
+.scrollbar-thumb-cyan-500\/50::-webkit-scrollbar-thumb {
+    background-color: rgba(6, 182, 212, 0.5);
+    border-radius: 10px;
+}
+.scrollbar-thumb-cyan-500\/50::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(34, 211, 238, 0.8);
+    box-shadow: 0 0 10px rgba(34, 211, 238, 0.8);
+}
+.scrollbar-track-slate-800\/50::-webkit-scrollbar-track {
+    background-color: rgba(30, 41, 59, 0.5);
+    border-radius: 10px;
 }
