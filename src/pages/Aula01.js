@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Volume2, VolumeX, ArrowRight, Gamepad2, MousePointer, Monitor, Zap, CheckCircle, Trophy, Sparkles, Hand, Keyboard } from 'lucide-react';
+import { Volume2, VolumeX, ArrowRight, Gamepad2, MousePointer, Monitor, Zap, CheckCircle, Trophy, Sparkles, Hand, Keyboard, Rat } from 'lucide-react';
 
 /* =========================================================================
    1. ESTILOS GLOBAIS (CSS-IN-JS)
@@ -15,7 +15,6 @@ const GlobalStyles = () => (
     /* Animações */
     @keyframes slideUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-    @keyframes pulse-neon { 0%, 100% { box-shadow: 0 0 10px var(--neon-blue); } 50% { box-shadow: 0 0 25px var(--neon-blue), 0 0 10px var(--neon-purple); } }
     @keyframes particleFade { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(0); opacity: 0; top: -50px; } }
 
     .animate-enter { animation: slideUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
@@ -36,7 +35,7 @@ const GlobalStyles = () => (
         box-shadow: 0 0 30px rgba(0, 243, 255, 0.3); z-index: 10;
     }
     .jack-img {
-        position: relative; z-index: 20; width: 180px; /* Maior que o circulo para sair */
+        position: relative; z-index: 20; width: 180px;
         transform: translateY(10px); transition: transform 0.3s;
         filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5));
     }
@@ -68,11 +67,11 @@ const GlobalStyles = () => (
 );
 
 /* =========================================================================
-   2. DADOS DA AULA (PORTUGUÊS CORRIGIDO)
+   2. DADOS DA AULA (VERIFIQUE SE OS ARQUIVOS NA PASTA PUBLIC TÊM ESSES NOMES)
    ========================================================================= */
 const SLIDES_DATA = [
   { type: 'video', src: '/abertura-aula.mp4' },
-  { type: 'slide', id: 1,  audio: '/slide-01.wav', gif: '/gif01.gif', title: 'Boas-vindas, Tech Master!', text: 'E aí! Eu sou o Jack, seu Player 2 nessa jornada. Se você está aqui, é porque quer dominar a tecnologia de verdade. Preparado?' },
+  { type: 'slide', id: 1,  audio: '/slide-01.wav', gif: '/gif01.gif', title: 'Boas-vindas, Tech Master!', text: 'E aí! Eu sou o Jack, seu Player 2 nessa jornada épica. Se você está aqui, é porque quer dominar a tecnologia de verdade. Preparado?' },
   { type: 'slide', id: 2,  audio: '/slide-02.wav', gif: '/gif02.gif', title: 'Nada de Tédio', text: 'Esqueça aquela ideia de "aula chata". Aqui nós temos Missões! Cada etapa foi criada para você se divertir enquanto aprende.' },
   { type: 'slide', id: 3,  audio: '/slide-03.wav', gif: '/gif01.gif', title: 'O Mapa de Fases', text: 'Dá uma olhada no nosso mapa! Cada fase desbloqueia um superpoder diferente. Vamos no seu ritmo, do zero ao profissional.' },
   { type: 'slide', id: 4,  audio: '/slide-04.wav', gif: '/gif02.gif', title: 'Objetivo Final', text: 'Ao final desta saga, você vai dominar o Mouse, o Teclado e entender exatamente o que acontece dentro da máquina!' },
@@ -86,23 +85,28 @@ const SLIDES_DATA = [
   { type: 'slide', id: 12, audio: '/slide-12.wav', gif: '/gif02.gif', title: 'Mão Relaxada', text: 'Regra de ouro: Mão relaxada! Deixe sua mão descansar sobre o mouse, como se fosse um travesseiro macio.' },
   { type: 'slide', id: 13, audio: '/slide-13.wav', gif: '/gif01.gif', title: 'Cuidado com o Punho', text: 'Atenção ao punho! Nada de deixar o pulso dobrado na quina da mesa. O braço precisa ter apoio total.' },
   { type: 'slide', id: 14, audio: '/slide-14.wav', gif: '/gif02.gif', title: 'Desafio de Precisão', text: 'Chega de papo, hora da ação! Vamos ver se você pegou o jeito. Sua missão é levar o cursor do ponto A ao ponto B.' },
-  { type: 'game-ninja' }, 
+  
+  { type: 'game-ninja' }, // JOGO 1
+  
+  // SLIDE 15: Toca APÓS o jogo do mouse e introduz o jogo da memória
   { type: 'slide', id: 15, audio: '/slide-15.wav', gif: '/gif01.gif', title: 'Desafio Final', text: 'Incrível! Seus reflexos são ótimos. Agora, para ganhar seu Emblema, vença o Desafio da Memória Gumers!', isLast: true },
-  { type: 'game-memory' }, 
-  { type: 'celebration' }
+  
+  { type: 'game-memory' }, // JOGO 2
+  
+  { type: 'celebration' } // TELA FINAL
 ];
 
 /* =========================================================================
-   3. COMPONENTES AUXILIARES (FIXED TYPING LOGIC)
+   3. COMPONENTES AUXILIARES
    ========================================================================= */
 const TypingText = ({ text, speed = 30 }) => {
     const [displayed, setDisplayed] = useState("");
     useEffect(() => {
       let i = 0;
-      setDisplayed(""); // Limpa antes de começar
+      setDisplayed(""); 
       const interval = setInterval(() => {
-        i++; // Incrementa antes
-        setDisplayed(text.slice(0, i)); // Usa slice para garantir que o texto inteiro apareça
+        i++;
+        setDisplayed(text.slice(0, i)); // Corrige o bug da primeira letra
         if (i >= text.length) clearInterval(interval);
       }, speed);
       return () => clearInterval(interval);
@@ -210,14 +214,13 @@ const NinjaLineGame = ({ onComplete }) => {
         window.removeEventListener('resize', resize); 
         if (gl.current.animId) cancelAnimationFrame(gl.current.animId); 
     };
-  }, [gameState, level]); // Correção: Dependência do useEffect
+  }, [gameState, level]);
 
   const handleMove = (e) => {
       const cx = e.clientX || e.touches?.[0]?.clientX;
       const cy = e.clientY || e.touches?.[0]?.clientY;
       if(cx && cy) { 
           gl.current.mouse.x = cx; gl.current.mouse.y = cy; 
-          // Trail
           if(Math.random()>0.5) gl.current.particles.push({x:cx,y:cy,vx:(Math.random()-0.5)*2,vy:(Math.random()-0.5)*2,life:1,color:gl.current.hasEnergy?'#fcd34d':'#fff',size:Math.random()*3});
       }
   };
@@ -327,9 +330,14 @@ export default function Aula01() {
   const data = SLIDES_DATA[stage];
   const progress = ((stage + 1) / SLIDES_DATA.length) * 100;
 
+  // Gerenciamento de Áudio com LOAD explícito
   useEffect(() => {
     if (data.type === 'slide' && audioRef.current) {
-        audioRef.current.pause(); audioRef.current.currentTime = 0; audioRef.current.src = data.audio;
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+        audioRef.current.src = data.audio;
+        audioRef.current.load(); // <--- CORREÇÃO AQUI
+        
         setTimeout(() => { 
             const playPromise = audioRef.current.play();
             if (playPromise !== undefined) playPromise.then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
@@ -374,7 +382,7 @@ export default function Aula01() {
 
                 <div className="absolute bottom-0 w-full flex flex-col items-center justify-end pb-8 px-4 z-40">
                     <div className="w-full max-w-5xl flex items-end gap-6 md:gap-10">
-                        {/* JACK AVATAR - AGORA FORA DO OVERFLOW */}
+                        {/* JACK AVATAR */}
                         <div className="jack-container">
                              <div className="jack-circle"></div>
                              <img src={data.gif} alt="Jack" className="jack-img" />
